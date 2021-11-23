@@ -45,7 +45,7 @@ function Section({ title, types }: SectionProps) {
   return (
     <div>
       <h3 className="f5 mt3 mb0">{title}</h3>
-      <div className="mw5 center MatchupsSection-Container">
+      <div className="center MatchupsSection-Container">
         {types.map((t) => (
           <Badge key={`type-${t}`} type={t} />
         ))}
@@ -62,6 +62,7 @@ interface MatchupsProps {
   matchups: GroupedMatchups;
   fallbackCoverageTypes: CoverageType[];
   isLoading: boolean;
+  noId?: boolean;
 }
 
 function Matchups({
@@ -72,9 +73,10 @@ function Matchups({
   matchups,
   fallbackCoverageTypes,
   isLoading,
+  noId,
 }: MatchupsProps) {
   return (
-    <div className="tc pt2" id={`matchup-${kind}`}>
+    <div className="tc pt2" id={noId ? undefined : `matchup-${kind}`}>
       {kind === "offense" ? (
         <div>
           <h3 className="f5 mt3 mb0">
@@ -92,7 +94,7 @@ function Matchups({
           </h3>
           <div
             className={classnames(
-              "pt1 mw5 center tc",
+              "pt1 center tc",
               isLoading && ["o-30 no-pointer cursor-na"]
             )}
           >
@@ -136,9 +138,15 @@ export interface DefenseProps {
   type1: Type;
   type2: Type;
   fallbackCoverageTypes: CoverageType[];
+  noId?: boolean;
 }
 
-export function Defense({ type1, type2, fallbackCoverageTypes }: DefenseProps) {
+export function Defense({
+  type1,
+  type2,
+  fallbackCoverageTypes,
+  noId,
+}: DefenseProps) {
   return (
     <Matchups
       kind="defense"
@@ -147,6 +155,7 @@ export function Defense({ type1, type2, fallbackCoverageTypes }: DefenseProps) {
       matchups={defensiveMatchups(type1, type2)}
       fallbackCoverageTypes={fallbackCoverageTypes}
       isLoading={false}
+      noId={noId}
     />
   );
 }

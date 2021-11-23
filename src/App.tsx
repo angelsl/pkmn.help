@@ -145,6 +145,7 @@ export default function App() {
               setPokedexParams={setPokedexParams}
               allPokemon={AllPokemon}
               isLoading={isLoading}
+              fallbackCoverageTypes={fallbackCoverageTypes}
             />
           )}
         />

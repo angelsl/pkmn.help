@@ -2,7 +2,7 @@ import classnames from "classnames";
 import matchSorter from "match-sorter";
 import * as React from "react";
 import { Link, useHistory } from "react-router-dom";
-import { Pokemon, Type, typesOrNoneFromString } from "./data";
+import { CoverageType, Pokemon, Type, typesOrNoneFromString } from "./data";
 import { getImage } from "./getImage";
 import Paginator from "./Paginator";
 import { pickTranslation } from "./pickTranslation";
@@ -11,6 +11,7 @@ import StatsTable from "./StatsTable";
 import { useSearch } from "./useSearch";
 import { useDebounce } from "use-debounce";
 import { cssType } from "./cssType";
+import * as Matchups from "./Matchups";
 
 const PAGE_SIZE = 20;
 const nbsp = "\u00a0";
@@ -40,17 +41,18 @@ function MonsterType({ type, index }: MonsterTypeProps) {
 
 interface MonsterProps {
   pokemon: Pokemon;
+  fallbackCoverageTypes: CoverageType[];
 }
 
-function Monster({ pokemon }: MonsterProps) {
+function Monster({ pokemon, fallbackCoverageTypes }: MonsterProps) {
   const displayNumber = "#" + String(pokemon.number).padStart(3, "0");
   const params = new URLSearchParams({ types: pokemon.types.join(" ") });
   const speciesName = pickTranslation(pokemon.speciesNames);
   const formName = pickTranslation(pokemon.formNames);
   return (
     <div className={classnames("fg1 pv3", "flex-ns items-center", "Monster")}>
-      <div className="flex flex-column">
-        <div className="flex flex-column pa3 br4 bg1 flex ba border3">
+      <div className="flex flex-column h-100">
+        <div className="flex flex-column pa3 br4 bg1 flex ba border3 h-100">
           <div className="flex items-center">
             <h2 className="mv0 f4">{speciesName}</h2>
             <div className="ph1 flex-auto" />
@@ -78,7 +80,13 @@ function Monster({ pokemon }: MonsterProps) {
       </div>
       <div className="flex flex-column">
         <StatsTable pokemon={pokemon} />
-        <div className="flex justify-end">
+        <Matchups.Defense
+          type1={pokemon.types[0]}
+          type2={pokemon.types[1] ?? Type.NONE}
+          fallbackCoverageTypes={fallbackCoverageTypes}
+          noId={true}
+        />
+        <div className="pt2 flex justify-end">
           <a
             aria-label={`Bulbapedia page for ${speciesName}`}
             className="underline fg-link OutlineFocus"
@@ -116,12 +124,14 @@ interface DexProps {
   allPokemon: Pokemon[];
   setPokedexParams: (params: string) => void;
   isLoading: boolean;
+  fallbackCoverageTypes: CoverageType[];
 }
 
 export default function ScreenPokedex({
   allPokemon,
   setPokedexParams,
   isLoading,
+  fallbackCoverageTypes,
 }: DexProps) {
   const search = useSearch();
   const history = useHistory();
@@ -187,7 +197,7 @@ export default function ScreenPokedex({
   }, [params]);
 
   return (
-    <main className="ph3 mt3 center content-narrow">
+    <main className="ph3 mt3 center content-wide">
       <Search
         search={query}
         updateSearch={(newQuery) => {
@@ -215,7 +225,11 @@ export default function ScreenPokedex({
           items={pkmn}
           renderPage={(page) =>
             page.map((pokemon) => (
-              <Monster key={pokemon.id} pokemon={pokemon} />
+              <Monster
+                key={pokemon.id}
+                pokemon={pokemon}
+                fallbackCoverageTypes={fallbackCoverageTypes}
+              />
             ))
           }
         />
